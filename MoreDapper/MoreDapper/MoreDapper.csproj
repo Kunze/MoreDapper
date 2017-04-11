@@ -59,8 +59,7 @@
     <Compile Include="Converter\Types\SimpleNullableConverter.cs" />
     <Compile Include="Converter\Types\StringConverter.cs" />
     <Compile Include="DapperExtensions.cs" />
-    <Compile Include="Exceptions\AutoIdentityCanNotHasDefaultValueException.cs" />
-    <Compile Include="Exceptions\AutoIdentityNotFoundException.cs" />
+    <Compile Include="Exceptions\PrimaryKeyNotFoundException.cs" />
     <Compile Include="Scanner\Parameter.cs" />
     <Compile Include="Scanner\ParameterScanner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

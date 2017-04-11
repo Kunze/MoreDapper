@@ -8,34 +8,34 @@ namespace MoreDapper.Config
 {
     public static class MoreDapperConfig
     {
-        private static List<string> GlobalAutoIdentity = new List<string>
+        private static List<string> GlobalPrimaryKeys = new List<string>
         {
             "Id"
         };
 
-        private static Dictionary<Type, List<string>> AutoIdentity = new Dictionary<Type, List<string>>();
+        private static Dictionary<Type, List<string>> PrimaryKeys = new Dictionary<Type, List<string>>();
 
-        public static void RemoveAutoIdentity(string property)
+        public static void RemovePrimaryKey(string property)
         {
             if (string.IsNullOrWhiteSpace(property))
             {
                 throw new ArgumentNullException("property can not be null or white space.");
             }
 
-            GlobalAutoIdentity.Remove(property);
+            GlobalPrimaryKeys.Remove(property);
         }
 
-        public static void AddAutoIdentity(string property)
+        public static void AddPrimaryKey(string property)
         {
             if(property == null)
             {
                 throw new ArgumentNullException("property can not be null.");
             }
 
-            GlobalAutoIdentity.Add(property);
+            GlobalPrimaryKeys.Add(property);
         }
 
-        public static void AddAutoIdentity(Type type, List<string> properties)
+        public static void AddPrimaryKey(Type type, List<string> properties)
         {
             if (type == null)
             {
@@ -60,47 +60,18 @@ namespace MoreDapper.Config
                 }
             }
 
-            AutoIdentity.Add(type, properties);
+            PrimaryKeys.Add(type, properties);
         }
 
-        public static bool Ignore(Type type, string property)
-        {
-            if (type == null)
-            {
-                throw new ArgumentNullException("type can not be null.");
-            }
-
-            if (string.IsNullOrWhiteSpace(property))
-            {
-                throw new ArgumentNullException("property can not be null or white space.");
-            }
-
-            if (GlobalAutoIdentity.Contains(property))
-            {
-                return true;
-            }
-
-            List<string> properties;
-            if(AutoIdentity.TryGetValue(type, out properties))
-            {
-                if (properties.Contains(property))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static List<string> GetPropertiesFor(Type type)
+        public static List<string> GetKeysFor(Type type)
         {
             List<string> properties = new List<string>();
 
-            if(!AutoIdentity.TryGetValue(type, out properties))
+            if(!PrimaryKeys.TryGetValue(type, out properties))
             {
                 properties = new List<string>();
             }
-            properties.AddRange(GlobalAutoIdentity);
+            properties.AddRange(GlobalPrimaryKeys);
 
             return properties;
         }

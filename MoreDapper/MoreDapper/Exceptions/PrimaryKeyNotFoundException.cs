@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MoreDapper.Exceptions
 {
-    public class AutoIdentityDefaultValueException : Exception
+    public class PrimaryKeyNotFoundException : Exception
     {
-        public AutoIdentityDefaultValueException(string message) : base(message)
+        public PrimaryKeyNotFoundException(string message) : base(message)
         {
         }
     }

@@ -19,7 +19,7 @@ namespace MoreDapper
 
             var type = typeof(T);
             var tableName = table ?? type.Name;
-            var identityProperties = MoreDapperConfig.GetPropertiesFor(type);
+            var identityProperties = MoreDapperConfig.GetKeysFor(type);
             var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
             var converter = SqlTypeConverter.GetInstance();
             var insert = new List<string>();
@@ -43,7 +43,7 @@ namespace MoreDapper
 
             var type = typeof(T);
             var tableName = table ?? type.Name;
-            var identityProperties = MoreDapperConfig.GetPropertiesFor(type);
+            var identityProperties = MoreDapperConfig.GetKeysFor(type);
             var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
             var converter = SqlTypeConverter.GetInstance();
             var insert = new StringBuilder($"INSERT INTO {tableName} (");

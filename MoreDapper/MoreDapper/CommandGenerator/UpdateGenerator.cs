@@ -17,11 +17,11 @@ namespace MoreDapper.CommandGenerator
             }
 
             var type = typeof(T);
-            var identityProperties = MoreDapperConfig.GetPropertiesFor(type);
+            var identityProperties = MoreDapperConfig.GetKeysFor(type);
 
             if(identityProperties.Count == 0)
             {
-                throw new AutoIdentityNotFoundException($"type {type.FullName} does not have a auto identity property.");
+                throw new PrimaryKeyNotFoundException($"type {type.FullName} does not have a auto identity property.");
             }
 
             var tableName = table ?? type.Name;
