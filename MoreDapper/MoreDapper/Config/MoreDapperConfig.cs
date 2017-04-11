@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,12 +10,12 @@ namespace MoreDapper.Config
 {
     public static class MoreDapperConfig
     {
-        private static List<string> GlobalPrimaryKeys = new List<string>
+        private static HashSet<string> GlobalPrimaryKeys = new HashSet<string>
         {
             "Id"
         };
 
-        private static Dictionary<Type, List<string>> PrimaryKeys = new Dictionary<Type, List<string>>();
+        private static Dictionary<Type, HashSet<string>> PrimaryKeys = new Dictionary<Type, HashSet<string>>();
 
         public static void RemovePrimaryKey(string property)
         {
@@ -27,12 +29,45 @@ namespace MoreDapper.Config
 
         public static void AddPrimaryKey(string property)
         {
-            if(property == null)
+            if (property == null)
             {
                 throw new ArgumentNullException("property can not be null.");
             }
 
             GlobalPrimaryKeys.Add(property);
+        }
+
+        public static void AddPrimaryKey(Type type, string property)
+        {
+            if (property == null)
+            {
+                throw new ArgumentNullException("property can not be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(property))
+            {
+                throw new ArgumentNullException("property can not be null or white space.");
+            }
+
+            var typeHasProperty = type.GetProperty(property);
+
+            if (typeHasProperty == null)
+            {
+                throw new ArgumentException($"type '{type.Name}' does not have a property '{property}'.");
+            }
+
+            var typeProperties = new HashSet<string>();
+            if (PrimaryKeys.TryGetValue(type, out typeProperties))
+            {
+                typeProperties.Add(property);
+            }
+            else
+            {
+                PrimaryKeys.Add(type, new HashSet<string>
+                {
+                    property
+                });
+            }
         }
 
         public static void AddPrimaryKey(Type type, List<string> properties)
@@ -60,18 +95,31 @@ namespace MoreDapper.Config
                 }
             }
 
-            PrimaryKeys.Add(type, properties);
+            foreach (var property in properties)
+            {
+                AddPrimaryKey(type, properties);
+            }
         }
 
-        public static List<string> GetKeysFor(Type type)
+        public static void AddPrimaryKey<TSource, TProperty>(Expression<Func<TSource, TProperty>> property)
         {
-            List<string> properties = new List<string>();
+            var type = typeof(TSource);
+            var expression = (MemberExpression)property.Body;
 
-            if(!PrimaryKeys.TryGetValue(type, out properties))
+            AddPrimaryKey(type, expression.Member.Name);
+        }
+
+        public static HashSet<string> GetKeysFor(Type type)
+        {
+            var properties = new HashSet<string>();
+            if (!PrimaryKeys.TryGetValue(type, out properties))
             {
-                properties = new List<string>();
+                properties = new HashSet<string>();
             }
-            properties.AddRange(GlobalPrimaryKeys);
+            foreach (var property in GlobalPrimaryKeys)
+            {
+                properties.Add(property);
+            }
 
             return properties;
         }
