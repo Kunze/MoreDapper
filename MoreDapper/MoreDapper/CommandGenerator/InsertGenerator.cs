@@ -1,6 +1,7 @@
 ﻿using MoreDapper.Config;
 using MoreDapper.Scanner;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace MoreDapper
 {
     internal class InsertGenerator
     {
-        internal string Generate<T>(T param, string table = null)
+        internal string GenerateSingle<T>(T param, string table = null)
         {
             if (param == null)
             {
@@ -33,15 +34,78 @@ namespace MoreDapper
             return string.Concat($"INSERT INTO {tableName} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
         }
 
-        internal string Generate<T>(string insert, string values, IList<T> list)
+        internal string GenerateMultiple<T>(IList<T> list, string table = null)
         {
-            var generatedValues = Generate(values, list);
+            if (list == null)
+            {
+                throw new ArgumentNullException("list can not be null.");
+            }
 
-            return string.Concat(insert, " ", generatedValues, ";");
+            var type = typeof(T);
+            var tableName = table ?? type.Name;
+            var identityProperties = MoreDapperConfig.GetPropertiesFor(type);
+            var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
+            var converter = SqlTypeConverter.GetInstance();
+            var insert = new StringBuilder($"INSERT INTO {tableName} (");
+            var values = new StringBuilder();
+
+            for (int i = 0; i < properties.Count; i++)
+            {
+                var property = properties[i];
+
+                insert.Append($"{property.Name}");
+
+                if (i != properties.Count - 1)
+                {
+                    insert.Append(", ");
+                }
+            }
+
+            for (int listIndex = 0; listIndex < list.Count; listIndex++)
+            {
+                var item = list[listIndex];
+
+                values.Append("(");
+                for (int propertyIndex = 0; propertyIndex < properties.Count; propertyIndex++)
+                {
+                    var property = properties[propertyIndex];
+                    var value = converter.GetValue(item, property);
+
+                    values.Append($"{value}");
+
+                    if (propertyIndex != properties.Count - 1)
+                    {
+                        values.Append(", ");
+                    }
+                }
+                values.Append(")");
+
+                if (listIndex != list.Count - 1)
+                {
+                    values.Append(", ");
+                }
+            }
+
+            return string.Concat(insert, ") VALUES ", string.Join(", ", values), ";");
         }
 
-        internal string Generate<T>(string values, IList<T> list)
+        internal string GenerateMultiple<T>(string insert, string values, IList<T> list)
         {
+            if (string.IsNullOrWhiteSpace(insert))
+            {
+                throw new ArgumentNullException("insert can not be null or white space.");
+            }
+
+            if (string.IsNullOrWhiteSpace(values))
+            {
+                throw new ArgumentNullException("values can not be null or white space.");
+            }
+
+            if (list == null)
+            {
+                throw new ArgumentNullException("list can not be null.");
+            }
+
             if (values[0] == '(')
             {
                 values = values.Remove(0, 1);
@@ -78,13 +142,13 @@ namespace MoreDapper
 
                 listValues.Append($"({sql})");
 
-                if(listIndex != list.Count - 1)
+                if (listIndex != list.Count - 1)
                 {
                     listValues.Append(", ");
                 }
             }
 
-            return listValues.ToString();
+            return string.Concat(insert, " ", listValues, ";");
         }
     }
 }

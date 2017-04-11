@@ -20,7 +20,7 @@ class Program
     {
         using (var connection = new SqlConnection("your_connectionstring"))
         {
-            var totalInserts = connection.Insert(new Bar
+            var totalInserts = connection.InsertSingle(new Bar
             {
                 Foo1 = "foo1",
                 Foo2 = 5,
@@ -57,7 +57,11 @@ class Program
                 });
             }
 
-            var totalInserts = connection.Insert("INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5) VALUES", "(@Foo1, @Foo2, @Foo3, @Foo4, @Foo5)", list);
+            var totalMultipleInserts1 = connection.InsertMultiple("INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5) VALUES", "(@Foo1, @Foo2, @Foo3, @Foo4, @Foo5)", list);
+
+            //or
+
+            var totalMultipleInserts2 = connection.InsertMultiple(list);
         }
     }
 }
