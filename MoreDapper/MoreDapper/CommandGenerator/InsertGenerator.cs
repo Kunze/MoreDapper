@@ -41,6 +41,16 @@ namespace MoreDapper
                 throw new ArgumentNullException("list can not be null.");
             }
 
+            if (maxItens <= 0)
+            {
+                throw new ArgumentException("maxItens can not be less or equal 0");
+            }
+
+            if (maxPacketSize <= 0)
+            {
+                throw new ArgumentException("maxPacketSize can not be less or equal 0");
+            }
+
             var type = typeof(T);
             var tableName = table ?? type.Name;
             var identityProperties = MoreDapperConfig.GetKeysFor(type);
@@ -79,6 +89,73 @@ namespace MoreDapper
             }
 
             return GenerateMultiple(insert.ToString(), values, maxItens, maxPacketSize);
+        }
+
+        internal List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
+        {
+            if (string.IsNullOrWhiteSpace(insert))
+            {
+                throw new ArgumentNullException("insert can not be null or white space.");
+            }
+
+            if (string.IsNullOrWhiteSpace(values))
+            {
+                throw new ArgumentNullException("values can not be null or white space.");
+            }
+
+            if (list == null)
+            {
+                throw new ArgumentNullException("list can not be null.");
+            }
+
+            if (maxItens <= 0)
+            {
+                throw new ArgumentException("maxItens can not be less or equal 0");
+            }
+
+            if (maxPacketSize <= 0)
+            {
+                throw new ArgumentException("maxPacketSize can not be less or equal 0");
+            }
+
+            if (values[0] == '(')
+            {
+                values = values.Remove(0, 1);
+            }
+
+            if (values[values.Length - 1] == ')')
+            {
+                values = values.Remove(values.Length - 1, 1);
+            }
+
+            var type = typeof(T);
+            var properties = type.GetProperties(); //<TODO>não funciona com Fields
+            var sqlProperties = SqlParameterScanner.Scan(values); //<TODO> gerar arvore sintática e gerar comando com string.Join
+            var converter = SqlTypeConverter.GetInstance();
+            var listValues = new List<string>();
+
+            for (int listIndex = 0; listIndex < list.Count; listIndex++)
+            {
+                var sql = values;
+                var item = list[listIndex];
+                var addIndex = 0;
+
+                for (int propertyIndex = 0; propertyIndex < sqlProperties.Count; propertyIndex++)
+                {
+                    var parameter = sqlProperties[propertyIndex];
+                    var value = converter.GetValue(item, type.GetProperty(parameter.GetParameterName()));
+                    var dif = (value.Length - parameter.Name.Length);
+
+                    sql = sql.Remove(parameter.StartIndex + addIndex, parameter.Name.Length);
+                    sql = sql.Insert(parameter.StartIndex + addIndex, value);
+
+                    addIndex += dif;
+                }
+
+                listValues.Add($"({sql})");
+            }
+
+            return GenerateMultiple(insert, listValues, maxItens, maxPacketSize);
         }
 
         private List<string> GenerateMultiple(string insert, List<string> values, int maxItens, int maxPacketSize)
@@ -122,78 +199,13 @@ namespace MoreDapper
                     {
                         commandSize = sumSize;
                         command.Append(concatenatedValue);
-                    }                    
+                    }
                 }
 
                 commands.Add($"{command.ToString()};");
             }
 
             return commands;
-        }
-
-        internal List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
-        {
-            if (string.IsNullOrWhiteSpace(insert))
-            {
-                throw new ArgumentNullException("insert can not be null or white space.");
-            }
-
-            if (string.IsNullOrWhiteSpace(values))
-            {
-                throw new ArgumentNullException("values can not be null or white space.");
-            }
-
-            if (list == null)
-            {
-                throw new ArgumentNullException("list can not be null.");
-            }
-
-            insert = insert.Trim();
-
-            if (values[0] == '(')
-            {
-                values = values.Remove(0, 1);
-            }
-
-            if (values[values.Length - 1] == ')')
-            {
-                values = values.Remove(values.Length - 1, 1);
-            }
-
-            var type = typeof(T);
-            var properties = type.GetProperties(); //<TODO>não funciona com Fields
-            var sqlProperties = SqlParameterScanner.Scan(values); //<TODO> gerar arvore sintática e gerar comando com string.Join
-            var converter = SqlTypeConverter.GetInstance();
-            var listValues = new List<string>();
-
-            for (int listIndex = 0; listIndex < list.Count; listIndex++)
-            {
-                var sql = values;
-                var item = list[listIndex];
-                var addIndex = 0;
-
-                for (int propertyIndex = 0; propertyIndex < sqlProperties.Count; propertyIndex++)
-                {
-                    var parameter = sqlProperties[propertyIndex];
-                    var value = converter.GetValue(item, type.GetProperty(parameter.GetParameterName()));
-                    var dif = (value.Length - parameter.Name.Length);
-
-                    sql = sql.Remove(parameter.StartIndex + addIndex, parameter.Name.Length);
-                    sql = sql.Insert(parameter.StartIndex + addIndex, value);
-
-                    addIndex += dif;
-                }
-
-                listValues.Add($"({sql})");
-
-                //if (listIndex != list.Count - 1)
-                //{
-                //    listValues.Append(", ");
-                //}
-            }
-
-            return GenerateMultiple(insert, listValues, maxItens, maxPacketSize);
-            //return string.Concat(insert, " ", listValues, ";");
         }
     }
 }
