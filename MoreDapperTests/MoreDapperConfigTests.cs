@@ -36,7 +36,7 @@ namespace MoreDapperTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "type 'Foo' does not have a property 'Foox';")]
+        [ExpectedException(typeof(ArgumentException))]
         public void InvalidProperty()
         {
             var type = typeof(Foo);

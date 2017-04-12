@@ -1,4 +1,5 @@
 ﻿using MoreDapper.Config;
+using MoreDapper.Exceptions;
 using MoreDapper.Scanner;
 using System;
 using System.Collections.Generic;
@@ -142,7 +143,15 @@ namespace MoreDapper
                 for (int propertyIndex = 0; propertyIndex < sqlProperties.Count; propertyIndex++)
                 {
                     var parameter = sqlProperties[propertyIndex];
-                    var value = converter.GetValue(item, type.GetProperty(parameter.GetParameterName()));
+                    var parameterName = parameter.GetParameterName();
+                    var property = type.GetProperty(parameterName);
+
+                    if(property == null)
+                    {
+                        throw new InvalidSqlParameterException($"Property '{parameterName}' does not exist in type {type.Name}.");
+                    }
+
+                    var value = converter.GetValue(item, property);
                     var dif = (value.Length - parameter.Name.Length);
 
                     sql = sql.Remove(parameter.StartIndex + addIndex, parameter.Name.Length);

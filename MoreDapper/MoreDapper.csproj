@@ -52,6 +52,7 @@
     <Compile Include="Converter\Types\BooleanConverter.cs" />
     <Compile Include="Converter\Types\DateTimeConverter.cs" />
     <Compile Include="Converter\Types\DecimalConverter.cs" />
+    <Compile Include="Converter\Types\DoubleConverter.cs" />
     <Compile Include="Converter\Types\FloatConverter.cs" />
     <Compile Include="Converter\Types\CharConverter.cs" />
     <Compile Include="Converter\Types\IntConverter.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Converter\Types\SimpleNullableConverter.cs" />
     <Compile Include="Converter\Types\StringConverter.cs" />
     <Compile Include="DapperExtensions.cs" />
+    <Compile Include="Exceptions\InvalidSqlParameterException.cs" />
     <Compile Include="Exceptions\PrimaryKeyNotFoundException.cs" />
     <Compile Include="Scanner\Parameter.cs" />
     <Compile Include="Scanner\ParameterScanner.cs" />

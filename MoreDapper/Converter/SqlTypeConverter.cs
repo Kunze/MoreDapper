@@ -18,7 +18,8 @@ namespace MoreDapper
                 new BooleanConverter(),
                 new IntConverter(),
                 new DateTimeConverter(),
-                new CharConverter()
+                new CharConverter(),
+                new DoubleConverter()
             };
         }
 

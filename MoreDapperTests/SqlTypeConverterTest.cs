@@ -13,6 +13,8 @@ namespace UnitTestProject1
         public string String2 { get; set; }
         public DateTime DateTime1 { get; set; }
         public DateTime? DateTime2 { get; set; }
+        public double Double1 { get; set; }
+        public double? NullableDouble { get; set; }
     }
 
     [TestClass]
@@ -101,6 +103,38 @@ namespace UnitTestProject1
             var info2 = converter.GetValue(model, property2);
 
             Assert.AreEqual("null", info2);
+        }
+
+        [TestMethod]
+        public void Double()
+        {
+            var model = new FakeModel()
+            {
+                Double1 = 10d
+            };
+            var type = model.GetType();
+            var property1 = model.GetType().GetProperty("Double1");
+
+            var converter = new DoubleConverter();
+
+            Assert.IsTrue(converter.Match(property1));
+            Assert.AreEqual("10", converter.GetValue(model, property1));
+        }
+
+        [TestMethod]
+        public void NullableDouble()
+        {
+            var model = new FakeModel()
+            {
+                NullableDouble = 11.10d
+            };
+            var type = model.GetType();
+            var property1 = model.GetType().GetProperty("NullableDouble");
+
+            var converter = new DoubleConverter();
+
+            Assert.IsTrue(converter.Match(property1));
+            Assert.AreEqual("11.1", converter.GetValue(model, property1));
         }
     }
 }

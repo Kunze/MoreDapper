@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoreDapper;
+using MoreDapper.Exceptions;
 using System.Collections.Generic;
 
 namespace UnitTestProject1
@@ -15,6 +16,7 @@ namespace UnitTestProject1
             public bool Foo4 { get; set; }
             public int? Foo5 { get; set; }
             public decimal Foo6 { get; set; }
+            public double? Foo7 { get; set; }
         }
 
         [TestMethod]
@@ -30,7 +32,7 @@ namespace UnitTestProject1
                 Foo6 = 15.1m
             });
 
-            Assert.AreEqual("INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5, Foo6) VALUES (@Foo1, @Foo2, @Foo3, @Foo4, @Foo5, @Foo6);", command);
+            Assert.AreEqual("INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5, Foo6, Foo7) VALUES (@Foo1, @Foo2, @Foo3, @Foo4, @Foo5, @Foo6, @Foo7);", command);
         }
 
         [TestMethod]
@@ -56,7 +58,7 @@ namespace UnitTestProject1
                 },
             }, 1000, 4194304);
 
-            var value = "INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5, Foo6) VALUES ('uma string', 'outra string', 'mais uma string', 1, null, 15.1), ('1', '2', '3', 0, null, 20);";
+            var value = "INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5, Foo6, Foo7) VALUES ('uma string', 'outra string', 'mais uma string', 1, null, 15.1, null), ('1', '2', '3', 0, null, 20, null);";
 
             Assert.AreEqual(value, commands[0]);
         }
@@ -65,7 +67,7 @@ namespace UnitTestProject1
         public void GeneratedFullCommand()
         {
             var insert = "Insert into table values";
-            var values = "(@Foo1, @Foo2, 'murilo', 10, 11.12, @Foo3, @Foo4, @Foo5, @Foo6)";
+            var values = "(@Foo1, @Foo2, 'murilo', 10, 11.12, @Foo3, @Foo4, @Foo5, @Foo6, @Foo7)";
 
             var commands = InsertGenerator.GenerateMultiple(insert, values, new List<Bar>
             {
@@ -75,7 +77,8 @@ namespace UnitTestProject1
                     Foo3 = "mais uma string",
                     Foo4 = true,
                     Foo5 = null,
-                    Foo6 = 15.1m
+                    Foo6 = 15.1m,
+                    Foo7 = 10.1d
                 },
                 new Bar {
                     Foo1 = "1",
@@ -83,11 +86,12 @@ namespace UnitTestProject1
                     Foo3 = "3",
                     Foo4 = false,
                     Foo5 = null,
-                    Foo6 = 20
+                    Foo6 = 20,
+                    Foo7 = 10.1d
                 },
             }, 1000, 4194304);
 
-            Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20);", commands[0]);
+            Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1, 10.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20, 10.1);", commands[0]);
         }
 
         [TestMethod]
@@ -134,6 +138,20 @@ namespace UnitTestProject1
             Assert.AreEqual(51, commands.Count);
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(InvalidSqlParameterException))]
+        public void InvalidProperty()
+        {
+            var insert = "Insert into table values";
+            var values = "(@Foo1, @FooX)";
+
+            var commands = InsertGenerator.GenerateMultiple(insert, values, new List<Bar>
+            {
+                new Bar()
+            }, 1000, 4194304);
+
+            Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1, 10.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20, 10.1);", commands[0]);
+        }
         //[TestMethod]
         //public void TestPerformance()
         //{
