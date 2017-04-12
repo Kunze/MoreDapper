@@ -29,7 +29,7 @@ class Program
                 Foo5 = 13.458m
             });
 
-            var totalUpdates = connection.Update(new Bar
+            var totalUpdates = connection.UpdateSingle(new Bar
             {
                 Id = 3,
                 Foo1 = "foo1 updated",
@@ -39,7 +39,7 @@ class Program
                 Foo5 = 13.999m
             });
 
-            var totalDeletes = connection.Delete(new Bar
+            var totalDeletes = connection.DeleteSingle(new Bar
             {
                 Id = 1
             });
