@@ -102,6 +102,11 @@ namespace MoreDapper
                 throw new ArgumentNullException("param can not be null.");
             }
 
+            if (param is IEnumerable)
+            {
+                throw new ArgumentException("param can not be a IEnumerable.");
+            }
+
             var command = new UpdateGenerator().Generate(param, table);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
@@ -112,6 +117,11 @@ namespace MoreDapper
             if (param == null)
             {
                 throw new ArgumentNullException("param can not be null.");
+            }
+
+            if (param is IEnumerable)
+            {
+                throw new ArgumentException("param can not be a IEnumerable.");
             }
 
             var command = new DeleteGenerator().Generate(param, table);
