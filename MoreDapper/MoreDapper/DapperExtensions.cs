@@ -34,7 +34,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable. Call InsertMultiple instead.");
             }
 
-            var command = new InsertGenerator().GenerateSingle(param, table);
+            var command = InsertGenerator.GenerateSingle(param, table);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
@@ -63,7 +63,7 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var commands = new InsertGenerator().GenerateMultiple(list, maxItens, maxPacketSize, table);
+            var commands = InsertGenerator.GenerateMultiple(list, maxItens, maxPacketSize, table);
 
             var total = 0;
             foreach (var command in commands)
@@ -109,7 +109,7 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var commands = new InsertGenerator().GenerateMultiple(insert, values, list, maxItens, maxPacketSize);
+            var commands = InsertGenerator.GenerateMultiple(insert, values, list, maxItens, maxPacketSize);
 
             var total = 0;
             foreach (var command in commands)
@@ -142,7 +142,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = new UpdateGenerator().Generate(param, table);
+            var command = UpdateGenerator.Generate(param, table);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
@@ -169,7 +169,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = new DeleteGenerator().Generate(param, table);
+            var command = DeleteGenerator.Generate(param, table);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }

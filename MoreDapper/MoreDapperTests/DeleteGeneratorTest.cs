@@ -20,8 +20,7 @@ namespace MoreDapperTests
         [TestMethod]
         public void Delete()
         {
-            var generator = new DeleteGenerator();
-            var command = generator.Generate(new Foo
+            var command = DeleteGenerator.Generate(new Foo
             {
                 Id = 5,
                 Foo1 = "foo1",

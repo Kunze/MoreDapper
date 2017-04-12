@@ -7,9 +7,9 @@ using System.Text;
 
 namespace MoreDapper.CommandGenerator
 {
-    internal class UpdateGenerator
+    internal static class UpdateGenerator
     {
-        internal string Generate<T>(T param, string table = null)
+        internal static string Generate<T>(T param, string table = null)
         {
             if (param == null)
             {

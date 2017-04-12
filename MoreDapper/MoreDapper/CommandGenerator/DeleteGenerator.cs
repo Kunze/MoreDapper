@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace MoreDapper.CommandGenerator
 {
-    internal class DeleteGenerator
+    internal static class DeleteGenerator
     {
-        internal string Generate<T>(T param, string table = null)
+        internal static string Generate<T>(T param, string table = null)
         {
             if(param == null)
             {

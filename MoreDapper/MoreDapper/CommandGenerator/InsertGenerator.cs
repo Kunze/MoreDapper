@@ -8,9 +8,9 @@ using System.Text;
 
 namespace MoreDapper
 {
-    internal class InsertGenerator
+    internal static class InsertGenerator
     {
-        internal string GenerateSingle<T>(T param, string table = null)
+        internal static string GenerateSingle<T>(T param, string table = null)
         {
             if (param == null)
             {
@@ -34,7 +34,7 @@ namespace MoreDapper
             return string.Concat($"INSERT INTO {tableName} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
         }
 
-        internal List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize, string table = null)
+        internal static List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize, string table = null)
         {
             if (list == null)
             {
@@ -91,7 +91,7 @@ namespace MoreDapper
             return GenerateMultiple(insert.ToString(), values, maxItens, maxPacketSize);
         }
 
-        internal List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
+        internal static List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
         {
             if (string.IsNullOrWhiteSpace(insert))
             {
@@ -158,7 +158,7 @@ namespace MoreDapper
             return GenerateMultiple(insert, listValues, maxItens, maxPacketSize);
         }
 
-        private List<string> GenerateMultiple(string insert, List<string> values, int maxItens, int maxPacketSize)
+        private static List<string> GenerateMultiple(string insert, List<string> values, int maxItens, int maxPacketSize)
         {
             var commands = new List<string>();
             var insertSize = Encoding.UTF8.GetBytes(insert).Length;

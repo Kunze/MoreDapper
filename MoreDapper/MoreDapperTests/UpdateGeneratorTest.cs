@@ -18,8 +18,7 @@ namespace MoreDapperTests
         [TestMethod]
         public void Update()
         {
-            var generator = new UpdateGenerator();
-            var command = generator.Generate(new Foo
+            var command = UpdateGenerator.Generate(new Foo
             {
                 Id = 5,
                 Foo1 = "foo1",

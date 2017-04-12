@@ -22,8 +22,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void GenerateInsertCommand()
         {
-            var insertGenerator = new InsertGenerator();
-            var command = insertGenerator.GenerateSingle(new Bar
+            var command = InsertGenerator.GenerateSingle(new Bar
             {
                 Foo1 = "uma string",
                 Foo2 = "outra string",
@@ -39,9 +38,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void GenerateMultipleInsertTyped()
         {
-            var commandGenerator = new InsertGenerator();
-
-            var commands = commandGenerator.GenerateMultiple(new List<Bar>
+            var commands = InsertGenerator.GenerateMultiple(new List<Bar>
             {
                 new Bar {
                     Foo1 = "uma string",
@@ -69,11 +66,10 @@ namespace UnitTestProject1
         [TestMethod]
         public void GeneratedFullCommand()
         {
-            var commandGenerator = new InsertGenerator();
             var insert = "Insert into table values";
             var values = "(@Foo1, @Foo2, 'murilo', 10, 11.12, @Foo3, @Foo4, @Foo5, @Foo6)";
 
-            var commands = commandGenerator.GenerateMultiple(insert, values, new List<Bar>
+            var commands = InsertGenerator.GenerateMultiple(insert, values, new List<Bar>
             {
                 new Bar {
                     Foo1 = "uma string",
@@ -112,9 +108,8 @@ namespace UnitTestProject1
                     Foo6 = 15.1m
                 });
             }
-            var commandGenerator = new InsertGenerator();
 
-            var commands = commandGenerator.GenerateMultiple(barList, 10, 4194304);
+            var commands = InsertGenerator.GenerateMultiple(barList, 10, 4194304);
 
             Assert.AreEqual(11, commands.Count);
         }
@@ -135,9 +130,8 @@ namespace UnitTestProject1
                     Foo6 = 15.1m
                 });
             }
-            var commandGenerator = new InsertGenerator();
 
-            var commands = commandGenerator.GenerateMultiple(barList, 1000, 250);
+            var commands = InsertGenerator.GenerateMultiple(barList, 1000, 250);
 
             Assert.AreEqual(51, commands.Count);
         }
