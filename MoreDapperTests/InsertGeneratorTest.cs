@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoreDapper;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace UnitTestProject1
 {

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MoreDapper;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoreDapper.Scanner;
 
 namespace UnitTestProject1
