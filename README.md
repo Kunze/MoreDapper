@@ -2,6 +2,18 @@
 Extension methods for Dapper
 
 ```cs
+InsertSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+
+///More than 50.000 inserts per minute on production
+InsertMultiple<T>(this IDbConnection connection, IList<T> list, string table = null, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
+InsertMultiple<T>(this IDbConnection connection, string insert, string values, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
+
+UpdateSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+
+DeleteSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+```
+
+```cs
 using MoreDapper;
 
 public class Bar
