@@ -29,29 +29,24 @@ namespace MoreDapper
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
 
-        public static int InsertMultiple<T>(this System.Data.IDbConnection connection, IList<T> list, string table = null, int maxItens = 1000, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertMultiple<T>(this System.Data.IDbConnection connection, IList<T> list, string table = null, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (list == null)
             {
                 throw new ArgumentNullException("list can not be null.");
             }
 
-            if(maxItens < 0)
+            if (maxItens < 0)
             {
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var total = 0;
-            foreach (var listItems in list.Select((x, i) => new { Index = i, Value = x })
-             .GroupBy(x => x.Index / maxItens)
-             .Select(x => x.Select(v => v.Value).ToList())
-             .ToList())
-            {
-                var command = new InsertGenerator().GenerateMultiple(listItems, table);
-                total += connection.Execute(command, commandTimeout: commandTimeout, transaction: transaction);
+            var commands = new InsertGenerator().GenerateMultiple(list, maxItens, maxPacketSize, table);
 
-                //<TODO>Ao enviar tudo em um comando só: Packets larger than max_allowed_packet are not allowed.
-                //total += connection.Execute(string.Concat(insert, command));
+            var total = 0;
+            foreach (var command in commands)
+            {
+                total += connection.Execute(command, commandTimeout: commandTimeout, transaction: transaction);
             }
 
             return total;
@@ -67,7 +62,7 @@ namespace MoreDapper
         /// <param name="list">IList<T> objects</param>
         /// <param name="maxItens">Maximun values per execution, ex: insert into table values (@Foo), (@Foo), (@Foo)</param>
         /// <returns>Total numbers affected</returns>
-        public static int InsertMultiple<T>(this IDbConnection connection, string insert, string values, IList<T> list, int maxItens = 1000, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertMultiple<T>(this IDbConnection connection, string insert, string values, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (string.IsNullOrWhiteSpace(insert))
             {
@@ -89,24 +84,18 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
+            var commands = new InsertGenerator().GenerateMultiple(insert, values, list, maxItens, maxPacketSize);
+
             var total = 0;
-            foreach (var listItems in list.Select((x, i) => new { Index = i, Value = x })
-             .GroupBy(x => x.Index / maxItens)
-             .Select(x => x.Select(v => v.Value).ToList())
-             .ToList())
+            foreach (var command in commands)
             {
-                var command = new InsertGenerator().GenerateMultiple(insert, values, listItems);
-
                 total += connection.Execute(command, commandTimeout: commandTimeout, transaction: transaction);
-
-                //<TODO>Ao enviar tudo em um comando só: Packets larger than max_allowed_packet are not allowed.
-                //total += connection.Execute(string.Concat(insert, command));
             }
 
             return total;
         }
 
-        public static int Update<T>(this System.Data.IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int UpdateSingle<T>(this System.Data.IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (param == null)
             {
@@ -118,7 +107,7 @@ namespace MoreDapper
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
 
-        public static int Delete<T>(this System.Data.IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int DeleteSingle<T>(this System.Data.IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (param == null)
             {

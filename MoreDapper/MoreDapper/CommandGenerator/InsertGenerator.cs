@@ -34,7 +34,7 @@ namespace MoreDapper
             return string.Concat($"INSERT INTO {tableName} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
         }
 
-        internal string GenerateMultiple<T>(IList<T> list, string table = null)
+        internal List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize, string table = null)
         {
             if (list == null)
             {
@@ -47,7 +47,7 @@ namespace MoreDapper
             var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
             var converter = SqlTypeConverter.GetInstance();
             var insert = new StringBuilder($"INSERT INTO {tableName} (");
-            var values = new StringBuilder();
+            var values = new List<string>();
 
             for (int i = 0; i < properties.Count; i++)
             {
@@ -60,36 +60,78 @@ namespace MoreDapper
                     insert.Append(", ");
                 }
             }
+            insert.Append(") VALUES ");
 
             for (int listIndex = 0; listIndex < list.Count; listIndex++)
             {
                 var item = list[listIndex];
+                var internalValues = new List<string>();
 
-                values.Append("(");
                 for (int propertyIndex = 0; propertyIndex < properties.Count; propertyIndex++)
                 {
                     var property = properties[propertyIndex];
                     var value = converter.GetValue(item, property);
 
-                    values.Append($"{value}");
-
-                    if (propertyIndex != properties.Count - 1)
-                    {
-                        values.Append(", ");
-                    }
+                    internalValues.Add($"{value}");
                 }
-                values.Append(")");
 
-                if (listIndex != list.Count - 1)
-                {
-                    values.Append(", ");
-                }
+                values.Add($"({string.Join(", ", internalValues)})");
             }
 
-            return string.Concat(insert, ") VALUES ", string.Join(", ", values), ";");
+            return GenerateMultiple(insert.ToString(), values, maxItens, maxPacketSize);
         }
 
-        internal string GenerateMultiple<T>(string insert, string values, IList<T> list)
+        private List<string> GenerateMultiple(string insert, List<string> values, int maxItens, int maxPacketSize)
+        {
+            var commands = new List<string>();
+            var insertSize = Encoding.UTF8.GetBytes(insert).Length;
+            var commandSize = insertSize;
+            insert = insert.Trim();
+            insert = string.Concat(insert, " ");
+
+            foreach (var listValues in values.Select((x, i) => new { Index = i, Value = x })
+            .GroupBy(x => x.Index / maxItens)
+            .Select(x => x.Select(v => v.Value).ToList())
+            .ToList())
+            {
+                var command = new StringBuilder(insert);
+
+                for (int i = 0; i < listValues.Count; i++)
+                {
+                    var value = listValues[i];
+                    var concatenation = string.Empty;
+                    if (i > 0)
+                    {
+                        concatenation = ", ";
+                    }
+
+                    var valueSize = Encoding.UTF8.GetBytes(value).Length;
+                    var concatenatedValue = string.Concat(concatenation, value);
+                    var concatenatedValueSize = Encoding.UTF8.GetBytes(concatenatedValue).Length;
+                    var sumSize = commandSize + concatenatedValueSize;
+
+                    if (sumSize >= maxPacketSize)
+                    {
+                        commands.Add($"{command.ToString()};");
+
+                        command = new StringBuilder(insert);
+                        command.Append(value);
+                        commandSize = insertSize + valueSize;
+                    }
+                    else
+                    {
+                        commandSize = sumSize;
+                        command.Append(concatenatedValue);
+                    }                    
+                }
+
+                commands.Add($"{command.ToString()};");
+            }
+
+            return commands;
+        }
+
+        internal List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
         {
             if (string.IsNullOrWhiteSpace(insert))
             {
@@ -106,6 +148,8 @@ namespace MoreDapper
                 throw new ArgumentNullException("list can not be null.");
             }
 
+            insert = insert.Trim();
+
             if (values[0] == '(')
             {
                 values = values.Remove(0, 1);
@@ -120,7 +164,7 @@ namespace MoreDapper
             var properties = type.GetProperties(); //<TODO>não funciona com Fields
             var sqlProperties = SqlParameterScanner.Scan(values); //<TODO> gerar arvore sintática e gerar comando com string.Join
             var converter = SqlTypeConverter.GetInstance();
-            var listValues = new StringBuilder();
+            var listValues = new List<string>();
 
             for (int listIndex = 0; listIndex < list.Count; listIndex++)
             {
@@ -140,15 +184,16 @@ namespace MoreDapper
                     addIndex += dif;
                 }
 
-                listValues.Append($"({sql})");
+                listValues.Add($"({sql})");
 
-                if (listIndex != list.Count - 1)
-                {
-                    listValues.Append(", ");
-                }
+                //if (listIndex != list.Count - 1)
+                //{
+                //    listValues.Append(", ");
+                //}
             }
 
-            return string.Concat(insert, " ", listValues, ";");
+            return GenerateMultiple(insert, listValues, maxItens, maxPacketSize);
+            //return string.Concat(insert, " ", listValues, ";");
         }
     }
 }

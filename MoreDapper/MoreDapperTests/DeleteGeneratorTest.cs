@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoreDapper.CommandGenerator;
 using UnitTestProject1;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace MoreDapperTests
 {

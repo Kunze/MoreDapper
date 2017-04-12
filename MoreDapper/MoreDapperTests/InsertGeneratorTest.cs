@@ -59,11 +59,11 @@ namespace UnitTestProject1
                     Foo5 = null,
                     Foo6 = 20
                 },
-            });
+            }, 1000, 4194304);
 
             var value = "INSERT INTO Bar (Foo1, Foo2, Foo3, Foo4, Foo5, Foo6) VALUES ('uma string', 'outra string', 'mais uma string', 1, null, 15.1), ('1', '2', '3', 0, null, 20);";
 
-            Assert.AreEqual(value, commands);
+            Assert.AreEqual(value, commands[0]);
         }
 
         [TestMethod]
@@ -73,7 +73,7 @@ namespace UnitTestProject1
             var insert = "Insert into table values";
             var values = "(@Foo1, @Foo2, 'murilo', 10, 11.12, @Foo3, @Foo4, @Foo5, @Foo6)";
 
-            var command = commandGenerator.GenerateMultiple(insert, values, new List<Bar>
+            var commands = commandGenerator.GenerateMultiple(insert, values, new List<Bar>
             {
                 new Bar {
                     Foo1 = "uma string",
@@ -91,9 +91,79 @@ namespace UnitTestProject1
                     Foo5 = null,
                     Foo6 = 20
                 },
-            });
+            }, 1000, 4194304);
 
-            Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20);", command);
+            Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20);", commands[0]);
         }
+
+        [TestMethod]
+        public void TestMaxItens()
+        {
+            var barList = new List<Bar>();
+            for (int i = 0; i < 101; i++)
+            {
+                barList.Add(new Bar
+                {
+                    Foo1 = "uma string",
+                    Foo2 = "outra string",
+                    Foo3 = "mais uma string",
+                    Foo4 = true,
+                    Foo5 = null,
+                    Foo6 = 15.1m
+                });
+            }
+            var commandGenerator = new InsertGenerator();
+
+            var commands = commandGenerator.GenerateMultiple(barList, 10, 4194304);
+
+            Assert.AreEqual(11, commands.Count);
+        }
+
+        [TestMethod]
+        public void TestMaxPacketSize()
+        {
+            var barList = new List<Bar>();
+            for (int i = 0; i < 101; i++)
+            {
+                barList.Add(new Bar
+                {
+                    Foo1 = $"uma string {i}",
+                    Foo2 = "outra string",
+                    Foo3 = "mais uma string",
+                    Foo4 = true,
+                    Foo5 = null,
+                    Foo6 = 15.1m
+                });
+            }
+            var commandGenerator = new InsertGenerator();
+
+            var commands = commandGenerator.GenerateMultiple(barList, 1000, 250);
+
+            Assert.AreEqual(51, commands.Count);
+        }
+
+        //[TestMethod]
+        //public void TestPerformance()
+        //{
+        //    var barList = new List<Bar>();
+        //    for (int i = 0; i < 100000; i++)
+        //    {
+        //        barList.Add(new Bar
+        //        {
+        //            Foo1 = "uma string",
+        //            Foo2 = "outra string",
+        //            Foo3 = "mais uma string",
+        //            Foo4 = true,
+        //            Foo5 = null,
+        //            Foo6 = 15.1m
+        //        });
+        //    }
+        //    var commandGenerator = new InsertGenerator();
+
+        //    var stopwatch = new Stopwatch();
+        //    stopwatch.Start();
+        //    var commands = commandGenerator.GenerateMultiple(barList, 10, 4194304);
+        //    var time = stopwatch.ElapsedMilliseconds;
+        //}
     }
 }
