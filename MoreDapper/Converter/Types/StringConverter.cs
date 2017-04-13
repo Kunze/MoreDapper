@@ -18,7 +18,7 @@ namespace MoreDapper.Converter.Types
                 return "null";
             }
 
-            value.Replace("'", "''");//<TODO>criar converter para isso?
+            value = value.Replace("'", "''");//<TODO>criar converter para isso?
 
             return $"'{value}'";
         }
