@@ -62,7 +62,6 @@ namespace MoreDapper.Scanner
                         parameters.Add(new Parameter(startIndex, i, text.Trim()));
                         text = "";
                         parameter = false;
-                        insideString = false;
                     }
                 }
 

@@ -2,35 +2,120 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MoreDapper.Converter.Types;
 using System.Globalization;
+using MoreDapper;
 
 namespace UnitTestProject1
 {
     public class FakeModel
     {
-        public bool Bool1 { get; set; }
-        public bool? Bool2 { get; set; }
-        public string String1 { get; set; }
-        public string String2 { get; set; }
-        public DateTime DateTime1 { get; set; }
-        public DateTime? DateTime2 { get; set; }
-        public double Double1 { get; set; }
+        public bool BoolProperty { get; set; }
+        public bool? NullableBool { get; set; }
+
+        public string StringProperty { get; set; }
+        public string NullableString { get; set; }
+
+        public DateTime DateTimeProperty { get; set; }
+        public DateTime? NullableDateTime { get; set; }
+
+        public double DoubleProperty { get; set; }
         public double? NullableDouble { get; set; }
+
+        public Int16 Int16Property { get; set; }
+        public Int16? NullableInt16 { get; set; }
+        public Int32 Int32Property { get; set; }
+        public Int32? NullableInt32 { get; set; }
+        public Int64 Int64Property { get; set; }
+        public Int64? NullableInt64 { get; set; }
+
+        public UInt16 UInt16Property { get; set; }
+        public UInt16? NullableUInt16 { get; set; }
+
+        public UInt32 UInt32Property { get; set; }
+        public UInt32? NullableUInt32 { get; set; }
+
+        public UInt64 UInt64Property { get; set; }
+        public UInt64? NullableUInt64 { get; set; }
     }
 
     [TestClass]
     public class SqlTypeConverterTest
     {
         [TestMethod]
-        public void BooleanConverterTest()
+        public void SqlTypeConverter()
+        {
+            var now = DateTime.Parse("01/02/2000 10:11:12", CultureInfo.InvariantCulture);
+
+            var model = new FakeModel()
+            {
+                BoolProperty = true,
+                DateTimeProperty = now,
+                DoubleProperty = 10.12d,
+                StringProperty = "murilo",
+                Int16Property = 16,
+                Int32Property = 32,
+                Int64Property = 64,
+                UInt16Property = 16,
+                UInt32Property = 32,
+                UInt64Property = 64
+            };
+            var type = model.GetType();
+
+            var converter = new SqlTypeConverter();
+
+            Assert.AreEqual("1", converter.GetValue(model, type.GetProperty("BoolProperty")));
+
+            Assert.AreEqual("01/02/2000 10:11:12", converter.GetValue(model, type.GetProperty("DateTimeProperty")));
+
+            Assert.AreEqual("10.12", converter.GetValue(model, type.GetProperty("DoubleProperty")));
+
+            Assert.AreEqual("'murilo'", converter.GetValue(model, type.GetProperty("StringProperty")));
+
+            Assert.AreEqual("16", converter.GetValue(model, type.GetProperty("Int16Property")));
+            Assert.AreEqual("32", converter.GetValue(model, type.GetProperty("Int32Property")));
+            Assert.AreEqual("64", converter.GetValue(model, type.GetProperty("Int64Property")));
+
+            Assert.AreEqual("16", converter.GetValue(model, type.GetProperty("UInt16Property")));
+            Assert.AreEqual("32", converter.GetValue(model, type.GetProperty("UInt32Property")));
+            Assert.AreEqual("64", converter.GetValue(model, type.GetProperty("UInt64Property")));
+
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableBool")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableDateTime")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableDouble")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableString")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableInt64")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableUInt16")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableUInt32")));
+            Assert.AreEqual("null", converter.GetValue(model, type.GetProperty("NullableUInt64")));
+
+            //Assert.IsTrue(converter.Match(property1));
+        }
+
+        [TestMethod]
+        public void SimpleQuoteConversion()
+        {
+            var model = new FakeModel
+            {
+                StringProperty = "'murilo"
+            };
+            var type = typeof(FakeModel);
+            var property = type.GetProperty("StringProperty");
+            var converter = new StringConverter();
+            var value = converter.GetValue(model, property);
+
+            Assert.AreEqual("'''murilo'", value);
+        }
+
+        [TestMethod]
+        public void BooleanConverter()
         {
             var model = new FakeModel()
             {
-                Bool1 = true,
-                Bool2 = true
+                BoolProperty = true,
+                NullableBool = true
             };
             var type = model.GetType();
-            var property1 = model.GetType().GetProperty("Bool1");
-            var property2 = model.GetType().GetProperty("Bool2");
+            var property1 = model.GetType().GetProperty("BoolProperty");
+            var property2 = model.GetType().GetProperty("NullableBool");
 
             var converter = new BooleanConverter();
 
@@ -45,23 +130,23 @@ namespace UnitTestProject1
 
             Assert.AreEqual("1", info2);
 
-            model.Bool2 = null;
+            model.NullableBool = null;
 
             var info3 = converter.GetValue(model, property2);
             Assert.AreEqual("null", info3);
         }
 
         [TestMethod]
-        public void StringConverterTest()
+        public void StringConverter()
         {
             var model = new FakeModel()
             {
-                String1 = "murilo",
-                String2 = null
+                StringProperty = "murilo",
+                NullableString = null
             };
             var type = model.GetType();
-            var property1 = model.GetType().GetProperty("String1");
-            var property2 = model.GetType().GetProperty("String2");
+            var property1 = model.GetType().GetProperty("StringProperty");
+            var property2 = model.GetType().GetProperty("NullableString");
 
             var converter = new StringConverter();
 
@@ -78,18 +163,18 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void DatetimeConverterTest()
+        public void DatetimeConverter()
         {
             var now = DateTime.Parse("01/02/2000 10:11:12", CultureInfo.InvariantCulture);
 
             var model = new FakeModel()
             {
-                DateTime1 = now,
-                DateTime2 = null
+                DateTimeProperty = now,
+                NullableDateTime = null
             };
             var type = model.GetType();
-            var property1 = model.GetType().GetProperty("DateTime1");
-            var property2 = model.GetType().GetProperty("DateTime2");
+            var property1 = model.GetType().GetProperty("DateTimeProperty");
+            var property2 = model.GetType().GetProperty("NullableDateTime");
 
             var converter = new DateTimeConverter();
 
@@ -106,35 +191,22 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void Double()
+        public void DoubleConverter()
         {
             var model = new FakeModel()
             {
-                Double1 = 10d
+                DoubleProperty = 10.12d,
+                NullableDouble = null
             };
             var type = model.GetType();
-            var property1 = model.GetType().GetProperty("Double1");
+            var property1 = model.GetType().GetProperty("DoubleProperty");
+            var property2 = model.GetType().GetProperty("NullableDouble");
 
             var converter = new DoubleConverter();
 
             Assert.IsTrue(converter.Match(property1));
-            Assert.AreEqual("10", converter.GetValue(model, property1));
-        }
-
-        [TestMethod]
-        public void NullableDouble()
-        {
-            var model = new FakeModel()
-            {
-                NullableDouble = 11.10d
-            };
-            var type = model.GetType();
-            var property1 = model.GetType().GetProperty("NullableDouble");
-
-            var converter = new DoubleConverter();
-
-            Assert.IsTrue(converter.Match(property1));
-            Assert.AreEqual("11.1", converter.GetValue(model, property1));
+            Assert.AreEqual("10.12", converter.GetValue(model, property1));
+            Assert.AreEqual("null", converter.GetValue(model, property2));
         }
     }
 }

@@ -6,7 +6,7 @@ namespace MoreDapper.Converter.Types
 {
     internal abstract class SimpleNullableConverter<T>
     {
-        public string GetValue(object obj, PropertyInfo property)
+        public virtual string GetValue(object obj, PropertyInfo property)
         {
             var value = property.GetValue(obj);
 
@@ -18,7 +18,7 @@ namespace MoreDapper.Converter.Types
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public bool Match(PropertyInfo property)
+        public virtual bool Match(PropertyInfo property)
         {
             Type t = property.PropertyType;
             t = Nullable.GetUnderlyingType(t) ?? t;
