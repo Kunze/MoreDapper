@@ -129,10 +129,20 @@ namespace MoreDapper
             }
 
             var type = typeof(T);
-            var properties = type.GetProperties(); //<TODO>não funciona com Fields
-            var sqlProperties = SqlParameterScanner.Scan(values); //<TODO> gerar arvore sintática e gerar comando com string.Join
+            var sqlParameters = SqlParameterScanner.Scan(values); //<TODO> gerar arvore sintática e gerar comando com string.Join
             var converter = SqlTypeConverter.GetInstance();
             var listValues = new List<string>();
+
+            foreach (var sqlParameter in sqlParameters)
+            {
+                var parameterName = sqlParameter.GetParameterName();
+                var property = type.GetProperty(parameterName);
+
+                if (property == null)
+                {
+                    throw new InvalidSqlParameterException($"Property '{parameterName}' does not exist in type {type.Name}.");
+                }
+            }
 
             for (int listIndex = 0; listIndex < list.Count; listIndex++)
             {
@@ -140,17 +150,11 @@ namespace MoreDapper
                 var item = list[listIndex];
                 var addIndex = 0;
 
-                for (int propertyIndex = 0; propertyIndex < sqlProperties.Count; propertyIndex++)
+                for (int propertyIndex = 0; propertyIndex < sqlParameters.Count; propertyIndex++)
                 {
-                    var parameter = sqlProperties[propertyIndex];
+                    var parameter = sqlParameters[propertyIndex];
                     var parameterName = parameter.GetParameterName();
                     var property = type.GetProperty(parameterName);
-
-                    if(property == null)
-                    {
-                        throw new InvalidSqlParameterException($"Property '{parameterName}' does not exist in type {type.Name}.");
-                    }
-
                     var value = converter.GetValue(item, property);
                     var dif = (value.Length - parameter.Name.Length);
 
