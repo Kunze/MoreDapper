@@ -3,11 +3,11 @@ using MoreDapper.Exceptions;
 using System;
 using System.Collections.Generic;
 
-namespace MoreDapper.CommandGenerator
+namespace MoreDapper.Generators
 {
     internal static class DeleteGenerator
     {
-        internal static string Generate<T>(T param, string table = null)
+        internal static string Generate<T>(T param)
         {
             if(param == null)
             {
@@ -15,22 +15,20 @@ namespace MoreDapper.CommandGenerator
             }
 
             var type = typeof(T);
-            var identityProperties = MoreDapperConfig.GetKeysFor(type);
-
-            if (identityProperties.Count == 0)
+            var sqlTable = SqlTableGenerator.Generate(param);
+            if (sqlTable.Keys.Count == 0)
             {
                 throw new PrimaryKeyNotFoundException($"type {type.FullName} does not have a primary key.");
             }
 
-            var tableName = table ?? type.Name;
             var where = new List<string>();
 
-            foreach (var identityProperty in identityProperties)
+            foreach (var identityProperty in sqlTable.Keys)
             {
-                where.Add($"{identityProperty} = @{identityProperty}");
+                where.Add($"{identityProperty.Name} = @{identityProperty.Name}");
             }
 
-            return string.Concat($"DELETE FROM {tableName} WHERE ", string.Join(" AND ", where), ";");
+            return string.Concat($"DELETE FROM {sqlTable.Name} WHERE ", string.Join(" AND ", where), ";");
         }
     }
 }

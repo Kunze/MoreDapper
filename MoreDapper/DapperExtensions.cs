@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Dapper;
 using System.Data;
-using MoreDapper.CommandGenerator;
+using MoreDapper.Generators;
 using System.Collections;
 
 namespace MoreDapper
@@ -19,7 +19,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int InsertSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertSingle<T>(this IDbConnection connection, T param, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (param == null)
             {
@@ -31,7 +31,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable. Call InsertMultiple instead.");
             }
 
-            var command = InsertGenerator.GenerateSingle(param, table);
+            var command = InsertGenerator.GenerateSingle(param);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
@@ -48,7 +48,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int InsertMultiple<T>(this IDbConnection connection, IList<T> list, string table = null, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertMultiple<T>(this IDbConnection connection, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (list == null)
             {
@@ -60,7 +60,7 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var commands = InsertGenerator.GenerateMultiple(list, maxItens, maxPacketSize, table);
+            var commands = InsertGenerator.GenerateMultiple(list, maxItens, maxPacketSize);
 
             var total = 0;
             foreach (var command in commands)
@@ -127,7 +127,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int UpdateSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int UpdateSingle<T>(this IDbConnection connection, T param, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (param == null)
             {
@@ -139,7 +139,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = UpdateGenerator.Generate(param, table);
+            var command = UpdateGenerator.Generate(param);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }
@@ -154,7 +154,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int DeleteSingle<T>(this IDbConnection connection, T param, string table = null, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int DeleteSingle<T>(this IDbConnection connection, T param, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (param == null)
             {
@@ -166,7 +166,7 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = DeleteGenerator.Generate(param, table);
+            var command = DeleteGenerator.Generate(param);
 
             return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
         }

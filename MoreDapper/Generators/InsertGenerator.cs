@@ -1,4 +1,5 @@
-﻿using MoreDapper.Config;
+﻿using MoreDapper.Generators;
+using MoreDapper.Config;
 using MoreDapper.Exceptions;
 using MoreDapper.Scanner;
 using System;
@@ -6,11 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MoreDapper
+namespace MoreDapper.Generators
 {
     internal static class InsertGenerator
     {
-        internal static string GenerateSingle<T>(T param, string table = null)
+        internal static string GenerateSingle<T>(T param)
         {
             if (param == null)
             {
@@ -18,23 +19,20 @@ namespace MoreDapper
             }
 
             var type = typeof(T);
-            var tableName = table ?? type.Name;
-            var identityProperties = MoreDapperConfig.GetKeysFor(type);
-            var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
-            var converter = SqlTypeConverter.GetInstance();
+            var sqlTable = SqlTableGenerator.Generate(param);
             var insert = new List<string>();
             var values = new List<string>();
 
-            foreach (var property in properties)
+            foreach (var property in sqlTable.Values)
             {
                 insert.Add($"{property.Name}");
                 values.Add($"@{property.Name}");
             }
 
-            return string.Concat($"INSERT INTO {tableName} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
+            return string.Concat($"INSERT INTO {sqlTable.Name} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
         }
 
-        internal static List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize, string table = null)
+        internal static List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize)
         {
             if (list == null)
             {
@@ -52,7 +50,7 @@ namespace MoreDapper
             }
 
             var type = typeof(T);
-            var tableName = table ?? type.Name;
+            var tableName = type.Name;
             var identityProperties = MoreDapperConfig.GetKeysFor(type);
             var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
             var converter = SqlTypeConverter.GetInstance();

@@ -46,9 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandGenerator\InsertGenerator.cs" />
-    <Compile Include="CommandGenerator\DeleteGenerator.cs" />
-    <Compile Include="CommandGenerator\UpdateGenerator.cs" />
+    <Compile Include="Generators\InsertGenerator.cs" />
+    <Compile Include="Generators\DeleteGenerator.cs" />
+    <Compile Include="Generators\UpdateGenerator.cs" />
+    <Compile Include="Generators\SqlTableGenerator.cs" />
     <Compile Include="Config\MoreDapperConfig.cs" />
     <Compile Include="Converter\Types\BooleanConverter.cs" />
     <Compile Include="Converter\Types\DateTimeConverter.cs" />

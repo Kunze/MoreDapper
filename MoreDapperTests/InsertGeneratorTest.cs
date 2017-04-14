@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MoreDapper;
+using MoreDapper.Generators;
 using MoreDapper.Exceptions;
 using System.Collections.Generic;
 

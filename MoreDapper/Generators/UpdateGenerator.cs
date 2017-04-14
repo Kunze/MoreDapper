@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MoreDapper.CommandGenerator
+namespace MoreDapper.Generators
 {
     internal static class UpdateGenerator
     {
-        internal static string Generate<T>(T param, string table = null)
+        internal static string Generate<T>(T param)
         {
             if (param == null)
             {
@@ -24,24 +24,22 @@ namespace MoreDapper.CommandGenerator
                 throw new PrimaryKeyNotFoundException($"type {type.FullName} does not have a auto identity property.");
             }
 
-            var tableName = table ?? type.Name;
-            var properties = type.GetProperties().Where(p => !identityProperties.Contains(p.Name)).ToList();
-            var converter = SqlTypeConverter.GetInstance();
+            var sqlTable = SqlTableGenerator.Generate(param);
             var declares = new StringBuilder();
             var set = new List<string>();
             var where = new List<string>();
 
-            foreach (var property in properties)
+            foreach (var property in sqlTable.Values)
             {
                 set.Add($"{property.Name} = @{property.Name}");
             }
 
-            foreach (var identityProperty in identityProperties)
+            foreach (var identityProperty in sqlTable.Keys)
             {
-                where.Add($"{identityProperty} = @{identityProperty}");
+                where.Add($"{identityProperty.Name} = @{identityProperty.Name}");
             }
 
-            return string.Concat($"UPDATE {tableName} SET ", string.Join(", ", set), " WHERE ", string.Join(" AND ", where), ";");
+            return string.Concat($"UPDATE {sqlTable.Name} SET ", string.Join(", ", set), " WHERE ", string.Join(" AND ", where), ";");
         }
     }
 }

@@ -112,9 +112,13 @@ namespace MoreDapper.Config
             {
                 properties = new HashSet<string>();
             }
+
             foreach (var property in GlobalPrimaryKeys)
             {
-                properties.Add(property);
+                if (type.GetProperty(property) != null)
+                {
+                    properties.Add(property);
+                }
             }
 
             return properties;

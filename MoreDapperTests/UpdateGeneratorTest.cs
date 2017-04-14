@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MoreDapper.CommandGenerator;
+using MoreDapper.Generators;
 
 namespace MoreDapperTests
 {

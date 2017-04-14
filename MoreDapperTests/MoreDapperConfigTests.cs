@@ -20,7 +20,7 @@ namespace MoreDapperTests
             MoreDapperConfig.AddPrimaryKey<Foo, string>((foo) => foo.Foo2);
 
             var properties = MoreDapperConfig.GetKeysFor(typeof(Foo));
-            Assert.AreEqual(3, properties.Count);
+            Assert.AreEqual(2, properties.Count);
         }
 
         [TestMethod]
@@ -32,7 +32,7 @@ namespace MoreDapperTests
             MoreDapperConfig.AddPrimaryKey(type, "Foo2");
 
             var properties = MoreDapperConfig.GetKeysFor(typeof(Foo));
-            Assert.AreEqual(3, properties.Count);
+            Assert.AreEqual(2, properties.Count);
         }
 
         [TestMethod]
