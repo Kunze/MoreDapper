@@ -4,7 +4,7 @@ using MoreDapper.Scanner;
 namespace UnitTestProject1
 {
     [TestClass]
-    public class SqlParameterScannerTest
+    public class SqlParameterScannerTests
     {
         [TestMethod]
         public void Scan()

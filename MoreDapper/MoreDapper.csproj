@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cache\StringCache.cs" />
     <Compile Include="Generators\InsertGenerator.cs" />
     <Compile Include="Generators\DeleteGenerator.cs" />
     <Compile Include="Generators\UpdateGenerator.cs" />

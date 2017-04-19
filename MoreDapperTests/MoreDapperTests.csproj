@@ -55,11 +55,12 @@
   </Choose>
   <ItemGroup>
     <Compile Include="InsertGeneratorTest.cs" />
-    <Compile Include="ParameterScanner.cs" />
+    <Compile Include="ParameterScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlTypeConverterTest.cs" />
     <Compile Include="DeleteGeneratorTest.cs" />
     <Compile Include="MoreDapperConfigTests.cs" />
+    <Compile Include="StringCacheTests.cs" />
     <Compile Include="UpdateGeneratorTest.cs" />
   </ItemGroup>
   <ItemGroup>

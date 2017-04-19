@@ -152,6 +152,7 @@ namespace UnitTestProject1
 
             Assert.AreEqual("Insert into table values ('uma string', 'outra string', 'murilo', 10, 11.12, 'mais uma string', 1, null, 15.1, 10.1), ('1', '2', 'murilo', 10, 11.12, '3', 0, null, 20, 10.1);", commands[0]);
         }
+
         //[TestMethod]
         //public void TestPerformance()
         //{

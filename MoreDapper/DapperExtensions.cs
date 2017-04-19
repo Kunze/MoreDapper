@@ -4,6 +4,7 @@ using Dapper;
 using System.Data;
 using MoreDapper.Generators;
 using System.Collections;
+using MoreDapper.Cache;
 
 namespace MoreDapper
 {
@@ -31,9 +32,18 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable. Call InsertMultiple instead.");
             }
 
-            var command = InsertGenerator.GenerateSingle(param);
+            var type = typeof(T);
 
-            return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
+            string cachedCommand;
+            var value = StringCache.TryGetCommand(type, Operation.Insert, out cachedCommand);
+
+            if (string.IsNullOrEmpty(cachedCommand))
+            {
+                cachedCommand = InsertGenerator.GenerateSingle(param);
+                StringCache.Add(type, Operation.Insert, cachedCommand);
+            }
+
+            return connection.Execute(cachedCommand, param, commandTimeout: commandTimeout, transaction: transaction);
         }
 
         /// <summary>
@@ -139,9 +149,17 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = UpdateGenerator.Generate(param);
+            var type = typeof(T);
+            string cachedCommand;
+            var value = StringCache.TryGetCommand(type, Operation.Update, out cachedCommand);
 
-            return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
+            if (string.IsNullOrEmpty(cachedCommand))
+            {
+                cachedCommand = UpdateGenerator.Generate(param);
+                StringCache.Add(type, Operation.Update, cachedCommand);
+            }
+
+            return connection.Execute(cachedCommand, param, commandTimeout: commandTimeout, transaction: transaction);
         }
 
         /// <summary>
@@ -166,9 +184,17 @@ namespace MoreDapper
                 throw new ArgumentException("param can not be a IEnumerable.");
             }
 
-            var command = DeleteGenerator.Generate(param);
+            var type = typeof(T);
+            string cachedCommand;
+            var value = StringCache.TryGetCommand(type, Operation.Delete, out cachedCommand);
 
-            return connection.Execute(command, param, commandTimeout: commandTimeout, transaction: transaction);
+            if (string.IsNullOrEmpty(cachedCommand))
+            {
+                cachedCommand = DeleteGenerator.Generate(param);
+                StringCache.Add(type, Operation.Delete, cachedCommand);
+            }
+
+            return connection.Execute(cachedCommand, param, commandTimeout: commandTimeout, transaction: transaction);
         }
     }
 }
