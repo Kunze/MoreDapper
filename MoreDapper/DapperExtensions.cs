@@ -29,7 +29,7 @@ namespace MoreDapper
 
             if (param is IEnumerable)
             {
-                throw new ArgumentException("param can not be a IEnumerable. Call InsertMultiple instead.");
+                throw new ArgumentException("param can not be a IEnumerable. Call InsertMany instead.");
             }
 
             var type = typeof(T);
@@ -47,7 +47,7 @@ namespace MoreDapper
         }
 
         /// <summary>
-        /// Insert multiples rows
+        /// Insert many rows
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
@@ -58,7 +58,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int InsertMultiple<T>(this IDbConnection connection, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertMany<T>(this IDbConnection connection, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (list == null)
             {
@@ -70,7 +70,7 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var commands = InsertGenerator.GenerateMultiple(list, maxItens, maxPacketSize);
+            var commands = InsertGenerator.GenerateMany(list, maxItens, maxPacketSize);
 
             var total = 0;
             foreach (var command in commands)
@@ -82,7 +82,7 @@ namespace MoreDapper
         }
 
         /// <summary>
-        /// Insert multiple rows
+        /// Insert many rows
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
@@ -94,7 +94,7 @@ namespace MoreDapper
         /// <param name="commandTimeout">commandTimeout</param>
         /// <param param name="transaction">transaction</param>
         /// <returns>Numbers of rows affected</returns>
-        public static int InsertMultiple<T>(this IDbConnection connection, string insert, string values, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
+        public static int InsertMany<T>(this IDbConnection connection, string insert, string values, IList<T> list, int maxItens = 1000, int maxPacketSize = 4194304, int? commandTimeout = null, IDbTransaction transaction = null)
         {
             if (string.IsNullOrWhiteSpace(insert))
             {
@@ -116,7 +116,7 @@ namespace MoreDapper
                 throw new ArgumentException("maxItens can not be less than 0.");
             }
 
-            var commands = InsertGenerator.GenerateMultiple(insert, values, list, maxItens, maxPacketSize);
+            var commands = InsertGenerator.GenerateMany(insert, values, list, maxItens, maxPacketSize);
 
             var total = 0;
             foreach (var command in commands)

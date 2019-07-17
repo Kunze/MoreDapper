@@ -32,7 +32,7 @@ namespace MoreDapper.Generators
             return string.Concat($"INSERT INTO {sqlTable.Name} (", string.Join(", ", insert), ") ", "VALUES (", string.Join(", ", values), ");");
         }
 
-        internal static List<string> GenerateMultiple<T>(IList<T> list, int maxItens, int maxPacketSize)
+        internal static List<string> GenerateMany<T>(IList<T> list, int maxItens, int maxPacketSize)
         {
             if (list == null)
             {
@@ -86,10 +86,10 @@ namespace MoreDapper.Generators
                 values.Add($"({string.Join(", ", internalValues)})");
             }
 
-            return GenerateMultiple(insert.ToString(), values, maxItens, maxPacketSize);
+            return GenerateMany(insert.ToString(), values, maxItens, maxPacketSize);
         }
 
-        internal static List<string> GenerateMultiple<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
+        internal static List<string> GenerateMany<T>(string insert, string values, IList<T> list, int maxItens, int maxPacketSize)
         {
             if (string.IsNullOrWhiteSpace(insert))
             {
@@ -165,10 +165,10 @@ namespace MoreDapper.Generators
                 listValues.Add($"({sql})");
             }
 
-            return GenerateMultiple(insert, listValues, maxItens, maxPacketSize);
+            return GenerateMany(insert, listValues, maxItens, maxPacketSize);
         }
 
-        private static List<string> GenerateMultiple(string insert, List<string> values, int maxItens, int maxPacketSize)
+        private static List<string> GenerateMany(string insert, List<string> values, int maxItens, int maxPacketSize)
         {
             var commands = new List<string>();
             var insertSize = Encoding.UTF8.GetBytes(insert).Length;

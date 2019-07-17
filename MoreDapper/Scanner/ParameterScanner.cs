@@ -36,7 +36,7 @@ namespace MoreDapper.Scanner
                 {
                     if (parameter)
                     {
-                        throw new Exception("Multiple parameter identifier");
+                        throw new Exception("Many parameter identifier");
                     }
 
                     if (!insideString)
